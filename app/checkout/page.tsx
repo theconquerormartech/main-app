@@ -1,60 +1,16 @@
 "use client";
 
-import { useState, useEffect } from "react";
-
-interface FormData {
-  firstName: string;
-  lastName: string;
-  email: string;
-}
+import { useUserFormData } from "@/lib/use-user-form-data";
 
 export default function CheckoutPage() {
-  const [formData, setFormData] = useState<FormData>({
-    firstName: "",
-    lastName: "",
-    email: "",
-  });
-  const [isLoading, setIsLoading] = useState(true);
-  const [message, setMessage] = useState("");
-
-  // Load form data from session on component mount
-  useEffect(() => {
-    const loadSessionData = async () => {
-      try {
-        const response = await fetch("/api/session/get");
-        const result = await response.json();
-        
-        if (result.success) {
-          setFormData({
-            firstName: result.data.firstName,
-            lastName: result.data.lastName,
-            email: result.data.email,
-          });
-          setMessage("Form data loaded from previous session!");
-        } else {
-          setMessage("No previous form data found. Please fill out the form.");
-        }
-      } catch (error) {
-        console.error("Error loading session data:", error);
-        setMessage("Error loading previous form data. Please fill out the form.");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadSessionData();
-  }, []);
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
+  const { formData, handleInputChange, isLoading, message, clearFormData } = useUserFormData();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Clear the cookie after successful checkout
+    clearFormData();
+    
     alert(`Checkout completed!\nFirst Name: ${formData.firstName}\nLast Name: ${formData.lastName}\nEmail: ${formData.email}`);
   };
 
